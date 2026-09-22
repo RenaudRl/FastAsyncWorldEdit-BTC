@@ -102,7 +102,12 @@ dependencies {
     implementation(libs.bstats.base) { isTransitive = false }
     implementation(libs.fastutil)
 
-    project.project(":worldedit-bukkit:adapters").subprojects.forEach {
+    // BTC: `-PonlyAdapters=adapter-26.3` builds a jar for a single server version, without setting
+    // up every other version's dev bundle. Absent, all adapters are included as upstream does.
+    val onlyAdapters = (findProperty("onlyAdapters") as String?)?.split(',')?.map(String::trim)?.toSet()
+    project.project(":worldedit-bukkit:adapters").subprojects
+        .filter { onlyAdapters == null || it.name in onlyAdapters }
+        .forEach {
         "adapters"(project(it.path))
         if (it.name.startsWith("adapter-1_")) {
             "adaptersReobf"(project(it.path))
