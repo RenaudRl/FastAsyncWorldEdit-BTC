@@ -461,7 +461,8 @@ public final class PaperweightPlatformAdapter extends NMSAdapter {
             var packedData = new PalettedContainerRO.PackedData<>(palette, Optional.ofNullable(bits));
             DataResult<PalettedContainer<net.minecraft.world.level.block.state.BlockState>> result;
             if (PaperSupport.isPaper()) {
-                // TODO this may change as Paper for 26.3 matures. May return to 26.2 implementation.
+                // Modified by BTC Studio, 2026-09-23: two-argument unpack, as in Paper 26.3 build 18
+                // (before the feature patches were re-applied). See README, "BTC Studio fork".
                 result = PalettedContainer.unpack(strategy, packedData);
             } else {
                 //noinspection unchecked
@@ -538,7 +539,7 @@ public final class PaperweightPlatformAdapter extends NMSAdapter {
         );
         DataResult<PalettedContainer<Holder<Biome>>> result;
         if (PaperSupport.isPaper()) {
-            // TODO this may change as Paper for 26.3 matures. May return to 26.2 implementation.
+            // Modified by BTC Studio, 2026-09-23: two-argument unpack, see above.
             result = PalettedContainer.unpack(
                 strategy,
                 packedData);

@@ -1,3 +1,28 @@
+> [!IMPORTANT]
+> ## BTC Studio fork: FAWE for Paper 26.3 build 18
+>
+> This is an **unofficial** fork of [IntellectualSites/FastAsyncWorldEdit](https://github.com/IntellectualSites/FastAsyncWorldEdit),
+> kept by BTC Studio for its own servers. **Please do not report problems with this build to IntellectualSites.**
+> Open an issue on this repository instead.
+>
+> **Branch `btc/26.3`** is upstream's `feat/26.3` (the Minecraft 26.3 pull request,
+> [#3661](https://github.com/IntellectualSites/FastAsyncWorldEdit/pull/3661)) plus two changes:
+>
+> | Change | Why |
+> |---|---|
+> | Revert of upstream `355c61a`, dev bundle pinned to `26.3.build.18-alpha` | Upstream now targets recent Paper 26.3 builds, where `PalettedContainer.unpack` takes 4 arguments. Our server runs on **Paper 26.3 build 18**, where it takes 2. Against build 18 the upstream jar throws `NoSuchMethodError` on every chunk write: edits are counted, never applied, and nothing is shown to the player. |
+> | Optional `-PonlyAdapters` | Builds a jar for a single server version without setting up every other version's dev bundle. |
+>
+> Use this build **only** on a server based on Paper 26.3 build 18. Anywhere else, use the official FAWE.
+> This fork becomes unnecessary once the server moves to a newer Paper 26.3 base.
+>
+> ```shell
+> ./gradlew :worldedit-bukkit:build -x test -x javadoc "-PonlyAdapters=adapter-26.3" --no-configure-on-demand
+> # -> worldedit-bukkit/build/libs/FastAsyncWorldEdit-Paper-*.jar
+> ```
+>
+> Licence unchanged: GNU GPL v3, see [LICENSE.txt](LICENSE.txt). Modified files carry a "BTC" notice.
+
 # FastAsyncWorldEdit
 [![Join us on Discord](https://img.shields.io/discord/268444645527126017.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/intellectualsites)
 [![bStats Servers](https://img.shields.io/bstats/servers/1403)](https://bstats.org/plugin/bukkit/FastAsyncWorldEdit/1403)
