@@ -374,7 +374,7 @@ public final class PaperweightPlatformAdapter extends NMSAdapter {
                         null,
                         null
                         // boolean parameter was removed from paper in 26.3
-                        // TODO Check when Paper 26.3 approaches beta.
+                        //TODO Check when Paper 26.3 approaches beta.
                     );
                 } else {
                     // deprecated on paper - deprecation suppressed
