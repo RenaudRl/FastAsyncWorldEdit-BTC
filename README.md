@@ -1,20 +1,19 @@
 > [!IMPORTANT]
-> ## BTC Studio fork: FAWE for Paper 26.3 build 18
+> ## BTC Studio fork: FAWE for Paper 26.3 build 191
 >
 > This is an **unofficial** fork of [IntellectualSites/FastAsyncWorldEdit](https://github.com/IntellectualSites/FastAsyncWorldEdit),
 > kept by BTC Studio for its own servers. **Please do not report problems with this build to IntellectualSites.**
 > Open an issue on this repository instead.
 >
-> **Branch `btc/26.3`** is upstream's `feat/26.3` (the Minecraft 26.3 pull request,
-> [#3661](https://github.com/IntellectualSites/FastAsyncWorldEdit/pull/3661)) plus two changes:
+> **Branch `btc/26.3`** is upstream's `main` plus two build changes (no code change):
 >
 > | Change | Why |
 > |---|---|
-> | Revert of upstream `355c61a`, dev bundle pinned to `26.3.build.18-alpha` | Upstream now targets recent Paper 26.3 builds, where `PalettedContainer.unpack` takes 4 arguments. Our server runs on **Paper 26.3 build 18**, where it takes 2. Against build 18 the upstream jar throws `NoSuchMethodError` on every chunk write: edits are counted, never applied, and nothing is shown to the player. |
+> | 26.3 dev bundle pinned to `26.3.build.191-stable` | The Paper build our server (BTC-CORE) is based on, so the adapter is compiled against it. |
 > | Optional `-PonlyAdapters` | Builds a jar for a single server version without setting up every other version's dev bundle. |
 >
-> Use this build **only** on a server based on Paper 26.3 build 18. Anywhere else, use the official FAWE.
-> This fork becomes unnecessary once the server moves to a newer Paper 26.3 base.
+> The former revert of upstream `355c61a` (two-argument `PalettedContainer.unpack`, for Paper 26.3 build 18)
+> was dropped when BTC-CORE moved to build 191.
 >
 > ```shell
 > ./gradlew :worldedit-bukkit:build -x test -x javadoc "-PonlyAdapters=adapter-26.3" --no-configure-on-demand
