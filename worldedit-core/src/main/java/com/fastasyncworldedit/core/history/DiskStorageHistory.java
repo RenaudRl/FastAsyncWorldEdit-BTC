@@ -57,17 +57,19 @@ public class DiskStorageHistory extends FaweStreamChangeSet {
      * [contents]...
      * { short rel x, short rel z, unsigned byte y, short combinedFrom, short combinedTo }
      */
-    private FaweOutputStream osBD;
+    // BTC: volatile + re-check under the lock (subset of upstream PR #3594): main-thread history writes run
+    // outside the change set's single worker, so two threads could each open the file and truncate the other.
+    private volatile FaweOutputStream osBD;
     // biome
-    private FaweOutputStream osBIO;
+    private volatile FaweOutputStream osBIO;
     // NBT From
-    private NBTOutputStream osNBTF;
+    private volatile NBTOutputStream osNBTF;
     // NBT To
-    private NBTOutputStream osNBTT;
+    private volatile NBTOutputStream osNBTT;
     // Entity Create From
-    private NBTOutputStream osENTCF;
+    private volatile NBTOutputStream osENTCF;
     // Entity Create To
-    private NBTOutputStream osENTCT;
+    private volatile NBTOutputStream osENTCT;
 
     private int index;
 
@@ -305,10 +307,14 @@ public class DiskStorageHistory extends FaweStreamChangeSet {
             return osBD;
         }
         synchronized (this) {
+            if (osBD != null) {
+                return osBD;
+            }
             bdFile.getParentFile().mkdirs();
             bdFile.createNewFile();
-            osBD = getCompressedOS(new FileOutputStream(bdFile));
-            writeHeader(osBD, x, y, z);
+            FaweOutputStream stream = getCompressedOS(new FileOutputStream(bdFile));
+            writeHeader(stream, x, y, z);
+            osBD = stream; // publish only once the header is written
             return osBD;
         }
     }
@@ -319,9 +325,11 @@ public class DiskStorageHistory extends FaweStreamChangeSet {
             return osBIO;
         }
         synchronized (this) {
-            bioFile.getParentFile().mkdirs();
-            bioFile.createNewFile();
-            osBIO = getCompressedOS(new FileOutputStream(bioFile));
+            if (osBIO == null) {
+                bioFile.getParentFile().mkdirs();
+                bioFile.createNewFile();
+                osBIO = getCompressedOS(new FileOutputStream(bioFile));
+            }
             return osBIO;
         }
     }
@@ -331,10 +339,12 @@ public class DiskStorageHistory extends FaweStreamChangeSet {
         if (osENTCT != null) {
             return osENTCT;
         }
-        enttFile.getParentFile().mkdirs();
-        enttFile.createNewFile();
-        osENTCT = new NBTOutputStream(getCompressedOS(new FileOutputStream(enttFile)));
-        return osENTCT;
+        synchronized (this) {
+            if (osENTCT == null) {
+                osENTCT = openNbt(enttFile);
+            }
+            return osENTCT;
+        }
     }
 
     @Override
@@ -342,10 +352,12 @@ public class DiskStorageHistory extends FaweStreamChangeSet {
         if (osENTCF != null) {
             return osENTCF;
         }
-        entfFile.getParentFile().mkdirs();
-        entfFile.createNewFile();
-        osENTCF = new NBTOutputStream(getCompressedOS(new FileOutputStream(entfFile)));
-        return osENTCF;
+        synchronized (this) {
+            if (osENTCF == null) {
+                osENTCF = openNbt(entfFile);
+            }
+            return osENTCF;
+        }
     }
 
     @Override
@@ -353,10 +365,12 @@ public class DiskStorageHistory extends FaweStreamChangeSet {
         if (osNBTT != null) {
             return osNBTT;
         }
-        nbttFile.getParentFile().mkdirs();
-        nbttFile.createNewFile();
-        osNBTT = new NBTOutputStream(getCompressedOS(new FileOutputStream(nbttFile)));
-        return osNBTT;
+        synchronized (this) {
+            if (osNBTT == null) {
+                osNBTT = openNbt(nbttFile);
+            }
+            return osNBTT;
+        }
     }
 
     @Override
@@ -364,10 +378,18 @@ public class DiskStorageHistory extends FaweStreamChangeSet {
         if (osNBTF != null) {
             return osNBTF;
         }
-        nbtfFile.getParentFile().mkdirs();
-        nbtfFile.createNewFile();
-        osNBTF = new NBTOutputStream(getCompressedOS(new FileOutputStream(nbtfFile)));
-        return osNBTF;
+        synchronized (this) {
+            if (osNBTF == null) {
+                osNBTF = openNbt(nbtfFile);
+            }
+            return osNBTF;
+        }
+    }
+
+    private NBTOutputStream openNbt(File file) throws IOException {
+        file.getParentFile().mkdirs();
+        file.createNewFile();
+        return new NBTOutputStream(getCompressedOS(new FileOutputStream(file)));
     }
 
     @Override
